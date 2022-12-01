@@ -1,21 +1,28 @@
 import './App.css';
+import Gamepads from 'gamepads';
+
 // import songs from './assets/songs.json';
 import React, { useEffect, useState } from 'react'
 
 const App = () => {
-  const [isA, setIsA] = useState(false)
-  const [isX, setIsX] = useState(false)
+  const [isLeft, setIsLeft] = useState(false)
+  const [isUp, setIsUp] = useState(false)
   const [isY, setIsY] = useState(false)
   const [isB, setIsB] = useState(false)
+  const [isGamePlaying, setIsGamePlaying] = useState(false)
+  const [gameArray, setGameArray] = useState([])
+
+  Gamepads.start();
+
   // const [isPlaying, setIsPlaying] = useState(false)
   let isPlaying = false;
+  let isGPlaying = false;
   const sampleSize = 1024;  // number of samples to collect before analyzing data
 
   // MUTE
   let context;
   let analyserNode;
   let javascriptNode;
-  let gainNode;
   let amplitudeArray;     // array to hold time domain data
   let source;
 
@@ -108,7 +115,6 @@ const App = () => {
 
 
   function play(audioBuffer) {
-    setupAudioNodes()
     console.log("play");
     source.buffer = audioBuffer;
     source.start();
@@ -122,72 +128,49 @@ const App = () => {
     // isPlaying = true
   }
 
+  function playNotes() {
+    console.log("playNotes");
+    if (gameArray.length > 0 && isGPlaying) {
+      let ga = gameArray
+      // console.log(ga);
+      if (ga[0] === "left") {
+        setIsLeft(true)
+      }
+      if (ga[0] === "up") {
+        setIsUp(true)
+      }
+      if (ga[0] === "y") {
+        setIsY(true)
+      }
+      if (ga[0] === "b") {
+        setIsB(true)
+      }
+      console.log(ga[0]);
+      ga.splice(0, 1)
+      setGameArray([...ga])
+    }
+  }
+
   // const loop = useCallback(() => {
   const loop = () => {
-    console.log("isPlaying : ", isPlaying);
     if (isPlaying) {
-      console.log("loop");
-      console.log(gainNode);
-      console.log(source);
       let veryLow = 0
       let low = 0
       let high = 0
       let veryHigh = 0
-
-
-      var freqByteData = amplitudeArray;
-      analyserNode.getByteFrequencyData(freqByteData);
-
-      var frequencyCount = analyserNode.frequencyBinCount
-      console.log("frequencyCount", frequencyCount);
-      console.log("freqByteData.length", freqByteData.length);
-
-      var min = 10000, max = -1, index = 0;
-      for (var i = freqByteData.length - 1; i >= 0; i--) {
-        min = Math.min(freqByteData[i], min);
-        max = Math.max(freqByteData[i], max);
-      };
-      var lines = [];
-      for (var i = freqByteData.length - 1; i >= 0; i = i - 2) {
-        lines.push(freqByteData[i]);
-      };
-      // console.log("lines : ", lines);
-      console.log("max : ", max);
-      index = lines.indexOf(max)
-      if (max >= 160) {
-        // setIsA(false)
-        // setIsX(false)
-        // setIsY(false)
-        // setIsB(false)
-        console.log("index : ", index);
-        if (index >= 0 && index <= freqByteData.length / 4) {
-          console.log("very low");
-          veryLow++
-        }
-        if (index > freqByteData.length / 4 && index <= freqByteData.length / 2) {
-          console.log("low");
-          low++
-        }
-        if (index > freqByteData.length / 2 && index <= freqByteData.length * 3 / 4) {
-          console.log("high");
-          high++
-        }
-        if (index > freqByteData.length * 3 / 2 && index <= freqByteData.length) {
-          console.log("very high");
-          veryHigh++
-        }
-      }
+      let gameArr = gameArray
 
       // updatePitch()
       var buf = new Float32Array(2048);
-
       analyserNode.getFloatTimeDomainData(buf);
-      var ac = autoCorrelate(buf, context.sampleRate);
+      // console.log(analyserNode.getFloatTimeDomainData(buf));
+      // console.log("context.sampleRate : ", context.sampleRate);
 
-      var pitch = ac;
+      var pitch = autoCorrelate(buf, context.sampleRate);
+      // console.log("pitch : ", pitch);
+
       var note = noteFromPitch(pitch);
-      // console.log(Math.round(pitch));
-      console.log("note : ", note);
+      // console.log("note : ", note);
       if ((note % 12) >= 0 && (note % 12) <= 2) {
         veryLow++
       }
@@ -202,21 +185,35 @@ const App = () => {
       }
 
       if (veryLow > low && veryLow > high && veryLow > veryHigh) {
-        setIsA(true)
+        gameArr.push("left")
+        // setIsLeft(true)
       }
       if (low > veryLow && low > high && low > veryHigh) {
-        setIsX(true)
+        gameArr.push("up")
+        // setIsUp(true)
       }
       if (high > veryLow && high > low && high > veryHigh) {
-        setIsY(true)
+        gameArr.push("y")
+        // setIsY(true)
       }
       if (veryHigh > veryLow && veryHigh > low && veryHigh > high) {
-        setIsB(true)
+        gameArr.push("b")
+        // setIsB(true)
+      } else {
+        gameArr.push("empty")
       }
-      console.log("veryLow : ", veryLow);
-      console.log("low : ", low);
-      console.log("high : ", high);
-      console.log("veryHigh : ", veryHigh);
+
+      setGameArray([...gameArr])
+      // console.log("gameArr :  ", gameArr);
+
+
+      // playNotes(gameArr);
+
+
+      // console.log("veryLow : ", veryLow);
+      // console.log("low : ", low);
+      // console.log("high : ", high);
+      // console.log("veryHigh : ", veryHigh);
     } else {
       source.stop()
       sourceGame.stop()
@@ -227,13 +224,15 @@ const App = () => {
   function handleStop() {
     console.log("Stoop");
     isPlaying = false
+    // setIsGamePlaying(false)
+
     // setIsPlaying(false)
 
-    source.stop()
+    // source.stop()
     sourceGame.stop()
 
-    setIsA(false)
-    setIsX(false)
+    setIsLeft(false)
+    setIsUp(false)
     setIsY(false)
     setIsB(false)
   }
@@ -241,6 +240,7 @@ const App = () => {
   const handlePlay = () => {
     context = new AudioContext()
     contextGame = new AudioContext()
+    setupAudioNodes()
 
     // setIsPlaying(true)
     isPlaying = true
@@ -251,20 +251,21 @@ const App = () => {
       .then(arrayBuffer => context.decodeAudioData(arrayBuffer))
       .then(audioBuffer => {
         musicBuffer = audioBuffer;
-      });
-    window.fetch('assets/songs-audio/angele.mp3')
-      .then(response => response.arrayBuffer())
-      .then(arrayBuffer => context.decodeAudioData(arrayBuffer))
-      .then(audioBuffer => {
-        gameBuffer = audioBuffer;
-        play(musicBuffer); // MUTE MUSIC (ACAPELLA)
+        window.fetch('assets/songs-audio/angele.mp3')
+          .then(response => response.arrayBuffer())
+          .then(arrayBuffer => context.decodeAudioData(arrayBuffer))
+          .then(audioBuffer => {
+            gameBuffer = audioBuffer;
+            play(musicBuffer); // MUTE MUSIC (ACAPELLA)
 
-        handleLoop()
+            handleLoop()
 
-        setTimeout(() => {
-          playGame(gameBuffer) // GAME MUSIC
-          // play(gameBuffer)
-        }, bpm / 2)
+            setTimeout(() => {
+              setIsGamePlaying(true)
+              isGPlaying = true
+              playGame(gameBuffer) // GAME MUSIC
+            }, bpm * 4)
+          });
       });
   }
 
@@ -278,56 +279,85 @@ const App = () => {
   }
 
   useEffect(() => {
-    if (isA) {
+    if (isLeft) {
       setTimeout(() => {
-        setIsA(false)
-      }, bpm)
+        setIsLeft(false)
+      }, bpm * 4)
     }
-  }, [isA])
+  }, [isLeft])
 
   useEffect(() => {
     if (isB) {
       setTimeout(() => {
         setIsB(false)
-      }, bpm)
+      }, bpm * 4)
     }
   }, [isB])
 
   useEffect(() => {
-    if (isX) {
+    if (isUp) {
       setTimeout(() => {
-        setIsX(false)
-      }, bpm)
+        setIsUp(false)
+      }, bpm * 4)
     }
-  }, [isX])
+  }, [isUp])
 
   useEffect(() => {
     if (isY) {
       setTimeout(() => {
         setIsY(false)
-      }, bpm)
+      }, bpm * 4)
     }
   }, [isY])
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      console.log("INTERVAL");
+      playNotes()
+    }, bpm);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, []);
+
+  // Add event listeners
+  Gamepads.addEventListener('connect', e => {
+    console.log('Gamepad connected');
+    console.log(e.gamepad);
+    e.gamepad.addEventListener('buttonpress', e => {
+      console.log(e.index);
+      if (e.index === 1) {
+        console.log("Bouton B");
+      } else if (e.index === 3) {
+        console.log("Bouton Y");
+      } else if (e.index === 12) {
+        console.log("Bouton up");
+      } else if (e.index === 14) {
+        console.log("Bouton left");
+      }
+    });
+  });
 
   return (
     <div className="App">
       <div>
+
         <h1 className='title'>Voice Hero</h1>
         <div>
           <div>
-            <button onClick={handlePlay} >Play</button>
+            <h2 className='button-play' onClick={handlePlay} >Play</h2>
             {/* <button onClick={handleStop} >Stop</button> */}
           </div>
-          <div>
-
+          <div style={{ display: "inline-flex" }}>
+            {/* <div style={{ margin: 20 }} >{isLeft ? "Left" : "_"}</div>
+            <div style={{ margin: 20 }} >{isUp ? "Up" : "_"}</div>
             <div style={{ margin: 20 }} >{isY ? "Y" : "_"}</div>
-            <div style={{ display: "inline-flex" }}>
-              <div style={{ margin: 60 }} >{isX ? "X" : "_"}</div>
-              <div style={{ margin: 60 }} >{isB ? "B" : "_"}</div>
-            </div>
-            <div style={{ margin: 20 }} >{isA ? "A" : "_"}</div>
-
-            
+            <div style={{ margin: 20 }} >{isB ? "B" : "_"}</div> */}
+            <div className={isLeft ? 'button-controller active' : "button-controller"} style={{ margin: 20 }} >{isLeft ? "Left" : "_"}</div>
+            <div className={isUp ? 'button-controller active' : "button-controller"} style={{ margin: 20 }} >{isUp ? "Up" : "_"}</div>
+            <div className={isY ? 'button-controller active' : "button-controller"} style={{ margin: 20 }} >{isY ? "Y" : "_"}</div>
+            <div className={isB ? 'button-controller active' : "button-controller"} style={{ margin: 20 }} >{isB ? "B" : "_"}</div>
           </div>
         </div>
       </div>
