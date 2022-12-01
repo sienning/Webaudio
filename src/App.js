@@ -1,6 +1,6 @@
 import './App.css';
 // import songs from './assets/songs.json';
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 const App = () => {
   const [isA, setIsA] = useState(false)
@@ -18,6 +18,7 @@ const App = () => {
   let gainNode;
   let amplitudeArray;     // array to hold time domain data
   let source;
+
   // GAME
   let contextGame;
   // let gainNodeGame;
@@ -84,7 +85,7 @@ const App = () => {
     analyserNode.maxDecibels = -10;
     analyserNode.fftSize = 256
     javascriptNode = context.createScriptProcessor(sampleSize, 1, 1);
-    
+
     // Create the array for the data values
     amplitudeArray = new Uint8Array(analyserNode.frequencyBinCount);
 
@@ -132,10 +133,7 @@ const App = () => {
       let low = 0
       let high = 0
       let veryHigh = 0
-      setIsA(false)
-      setIsX(false)
-      setIsY(false)
-      setIsB(false)
+
 
       var freqByteData = amplitudeArray;
       analyserNode.getByteFrequencyData(freqByteData);
@@ -157,6 +155,10 @@ const App = () => {
       console.log("max : ", max);
       index = lines.indexOf(max)
       if (max >= 160) {
+        // setIsA(false)
+        // setIsX(false)
+        // setIsY(false)
+        // setIsB(false)
         console.log("index : ", index);
         if (index >= 0 && index <= freqByteData.length / 4) {
           console.log("very low");
@@ -239,7 +241,6 @@ const App = () => {
   const handlePlay = () => {
     context = new AudioContext()
     contextGame = new AudioContext()
-    // setupAudioNodes();
 
     // setIsPlaying(true)
     isPlaying = true
@@ -250,22 +251,20 @@ const App = () => {
       .then(arrayBuffer => context.decodeAudioData(arrayBuffer))
       .then(audioBuffer => {
         musicBuffer = audioBuffer;
-        // handleLoop()
       });
     window.fetch('assets/songs-audio/angele.mp3')
       .then(response => response.arrayBuffer())
       .then(arrayBuffer => context.decodeAudioData(arrayBuffer))
       .then(audioBuffer => {
         gameBuffer = audioBuffer;
-        play(musicBuffer);
-
+        play(musicBuffer); // MUTE MUSIC (ACAPELLA)
 
         handleLoop()
 
         setTimeout(() => {
-          playGame(gameBuffer)
+          playGame(gameBuffer) // GAME MUSIC
           // play(gameBuffer)
-        }, bpm)
+        }, bpm / 2)
       });
   }
 
@@ -275,30 +274,49 @@ const App = () => {
       // get the Time Domain data for this sample
       analyserNode.getByteTimeDomainData(amplitudeArray);
       loop();
-    }, bpm / 2)
+    }, bpm)
   }
 
-  // useEffect(() => {
-  //   console.log("useeffect");
-  //   let interval;
-  //   if (isPlaying) {
-  //     interval = setInterval(() => {
-  //       analyserNode.getByteTimeDomainData(amplitudeArray);
-  //       loop();
-  //     }, 1000 * 5);
-  //   }
-  //   else return () => clearInterval(interval);
+  useEffect(() => {
+    if (isA) {
+      setTimeout(() => {
+        setIsA(false)
+      }, bpm)
+    }
+  }, [isA])
 
-  // }, [amplitudeArray, analyserNode, loop, isPlaying])
+  useEffect(() => {
+    if (isB) {
+      setTimeout(() => {
+        setIsB(false)
+      }, bpm)
+    }
+  }, [isB])
+
+  useEffect(() => {
+    if (isX) {
+      setTimeout(() => {
+        setIsX(false)
+      }, bpm)
+    }
+  }, [isX])
+
+  useEffect(() => {
+    if (isY) {
+      setTimeout(() => {
+        setIsY(false)
+      }, bpm)
+    }
+  }, [isY])
 
   return (
     <div className="App">
       <div>
-        <h1>Guitar Hero</h1>
+        <h1 className='title'>Voice Hero</h1>
         <div>
           <div>
             <button onClick={handlePlay} >Play</button>
-            <button onClick={handleStop} >Stop</button>
+            {/* <button onClick={handleStop} >Stop</button> */}
           </div>
           <div>
 
@@ -308,6 +326,8 @@ const App = () => {
               <div style={{ margin: 60 }} >{isB ? "B" : "_"}</div>
             </div>
             <div style={{ margin: 20 }} >{isA ? "A" : "_"}</div>
+
+            
           </div>
         </div>
       </div>
