@@ -7,10 +7,19 @@ import React, { useCallback, useEffect, useState } from 'react'
 const App = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [isControllerReady, setIsControllerReady] = useState(false)
+
+  // BUTTON CONTROLLER STATE
+  const [isLeftOn, setIsLeftOn] = useState(false)
+  const [isUpOn, setIsUpOn] = useState(false)
+  const [isYOn, setIsYOn] = useState(false)
+  const [isBOn, setIsBOn] = useState(false)
+
+  // NOTE TO PLAY
   const [isLeft, setIsLeft] = useState(false)
   const [isUp, setIsUp] = useState(false)
   const [isY, setIsY] = useState(false)
   const [isB, setIsB] = useState(false)
+
   const [isGamePlaying, setIsGamePlaying] = useState(false)
   const [textResult, setTextResult] = useState("")
   const [gameArray, setGameArray] = useState([])
@@ -40,6 +49,31 @@ const App = () => {
     isLeftRef.current = data;
     setIsLeft(data);
   };
+
+  const isBRefOn = React.useRef(isBOn);
+  const setBRefOn = data => {
+    isBRefOn.current = data;
+    setIsBOn(data);
+  };
+
+  const isYRefOn = React.useRef(isYOn);
+  const setYRefOn = data => {
+    isYRefOn.current = data;
+    setIsYOn(data);
+  };
+
+  const isUpRefOn = React.useRef(isUpOn);
+  const setUpRefOn = data => {
+    isUpRefOn.current = data;
+    setIsUpOn(data);
+  };
+
+  const isLeftRefOn = React.useRef(isLeftOn);
+  const setLeftRefOn = data => {
+    isLeftRefOn.current = data;
+    setIsLeftOn(data);
+  };
+
 
   let time = 0
   Gamepads.start();
@@ -355,78 +389,26 @@ const App = () => {
     }
   }, [textResult])
 
-  const checkB = useCallback(() => {
-    // const checkB = () => {
-    console.log("CHECK B", isB);
-    return isB
-  }, [isB])
-  // }
-
-  const checkY = useCallback(() => {
-    // const checkY = () => {
-    console.log("CHECK Y", isY);
-    return isY
-  }, [isY])
-  // }
-
-
-  const checkUp = useCallback(() => {
-    // const checkUp = () => {
-    console.log("CHECK UP", isUp);
-    return isUp
-  }, [isUp])
-  // }
-
-  const checkLeft = useCallback(() => {
-    // const checkLeft = () => {
-    console.log("CHECK LEFT", isLeft);
-    return isLeft
-  }, [isLeft])
-  // }
-
 
   useEffect(() => {
-    // const b = checkB();
-    // const y = checkY();
-    // const left = checkLeft();
-    // const up = checkUp();
-    // console.log("GAMEPAD1 isB", b);
-    // checkB()
-
 
     // Add event listeners
     Gamepads.addEventListener('connect', (e) => {
-      // console.log('Gamepad connected');
       setIsControllerReady(true)
       console.log(e.gamepad);
 
-    
-
-      // let eltb = document.getElementById("b")
-      // eltb.style.background = "white" 
-
-      // let elty = document.getElementById("y")
-      // elty.style.background = "white" 
-
-      // let eltleft = document.getElementById("left")
-      // eltleft.style.background = "white"
-
-      // let eltup = document.getElementById("up")
-      // eltup.style.background = "white"
-
       e.gamepad.addEventListener('buttonpress', e => {
-        // console.log("GAMEPAD2 isB", b);
-        // console.log("currentNote", currentNote);
-        if (e.index === 1) {
-          // eltb.style.background = "#f9db5b"
+        if (e.index === 1) { // B
           console.log("isB", isBRef.current);
+          setBRefOn(true)
           // console.log("Bouton B");
           if (isBRef.current) {
             setTextResult("yes")
           } else {
             setTextResult("X")
           }
-        } else if (e.index === 3) {
+        } else if (e.index === 3) { // Y
+          setYRefOn(true)
           // elty.style.background = "#f9db5b"
           // console.log("isY", isY);
           // console.log("Bouton Y");
@@ -435,7 +417,8 @@ const App = () => {
           } else {
             setTextResult("X")
           }
-        } else if (e.index === 12) {
+        } else if (e.index === 12) { // Up
+          setUpRefOn(true)
           // eltup.style.background = "#f9db5b"
           // console.log("isUp", isUp);
           // console.log("Bouton up");
@@ -444,7 +427,8 @@ const App = () => {
           } else {
             setTextResult("X")
           }
-        } else if (e.index === 14) {
+        } else if (e.index === 14) { // Left
+          setLeftRefOn(true)
           // eltleft.style.background = "#f9db5b"
           // console.log("isLeft", isLeft);
           // console.log("Bouton left");
@@ -455,7 +439,21 @@ const App = () => {
           }
         }
       });
+      e.gamepad.addEventListener('buttonrelease', e => {
+        if (e.index === 1) { // B
+          setBRefOn(false)
+        } else if (e.index === 3) { // Y
+          setYRefOn(false)
+        } else if (e.index === 12) { // Up
+          setUpRefOn(false)
+        } else if (e.index === 14) { // Left
+          setLeftRefOn(false)
+        }
+      });
+
+
     });
+
     // }, [])
   }, [])
 
@@ -482,7 +480,7 @@ const App = () => {
                 <div style={{ height: "50px" }}>
                   {
                     isGamePlaying ?
-                      <p>{textResult}</p>
+                      <p style={{ fontSize: 20 }}>{textResult}</p>
                       : <p></p>
                   }
                 </div>
@@ -494,10 +492,10 @@ const App = () => {
             <div style={{ margin: 20 }} >{isY ? "Y" : "_"}</div>
             <div style={{ margin: 20 }} >{isB ? "B" : "_"}</div> */}
                 <div className='button-final'>
-                  <div id="left" className={"button-controller"} >{"<"}</div>
-                  <div id="up" className={"button-controller"} >{"^"}</div>
-                  <div id="y" className={"button-controller"} >Y</div>
-                  <div id="b" className={"button-controller"} >B</div>
+                  <div id="left" style={isLeftOn ? {background: "#f9db5b"} : {background: "white"}} className={"button-controller"} >{"<"}</div>
+                  <div id="up" style={isUpOn ? {background: "#f9db5b"} : {background: "white"}} className={"button-controller"} >{"^"}</div>
+                  <div id="y" style={isYOn ? {background: "#f9db5b"} : {background: "white"}} className={"button-controller"} >Y</div>
+                  <div id="b" style={isBOn ? {background: "#f9db5b"} : {background: "white"}} className={"button-controller"} >B</div>
                 </div>
                 <div className='button-game'>
                   <div className={isLeft ? 'button-game-playing active' : "button-game-playing inactive"} ></div>
