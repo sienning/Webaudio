@@ -5,13 +5,18 @@ import Gamepads from 'gamepads';
 import React, { useEffect, useState } from 'react'
 
 const App = () => {
+  const [isLoading, setIsLoading] = useState(false)
+  const [isControllerReady, setIsControllerReady] = useState(false)
   const [isLeft, setIsLeft] = useState(false)
   const [isUp, setIsUp] = useState(false)
   const [isY, setIsY] = useState(false)
   const [isB, setIsB] = useState(false)
   const [isGamePlaying, setIsGamePlaying] = useState(false)
+  const [textResult, setTextResult] = useState("")
   const [gameArray, setGameArray] = useState([])
+  // const [time, setTime] = useState(0)
 
+  let time = 0
   Gamepads.start();
 
   // const [isPlaying, setIsPlaying] = useState(false)
@@ -33,6 +38,7 @@ const App = () => {
   // const bpm = 652 // Hail the apocalpyse
   // const bpm = 488 // Welcome to the jungle
   const bpm = 465 // Libre
+
 
   function autoCorrelate(buf, sampleRate) {
     // Implements the ACF2+ algorithm
@@ -128,32 +134,35 @@ const App = () => {
     // isPlaying = true
   }
 
-  function playNotes() {
-    console.log("playNotes");
-    if (gameArray.length > 0 && isGPlaying) {
-      let ga = gameArray
+  function playNotes(time, ga) {
+    console.log("gameArray : ", gameArray);
+    console.log("ga : ", ga);
+    let currentTime = time - 4
+    if (ga.length > 0) {
+      console.log("We play notes");
+      console.log("ga : ", ga);
       // console.log(ga);
-      if (ga[0] === "left") {
+      if (ga[currentTime] === "left") {
         setIsLeft(true)
       }
-      if (ga[0] === "up") {
+      if (ga[currentTime] === "up") {
         setIsUp(true)
       }
-      if (ga[0] === "y") {
+      if (ga[currentTime] === "y") {
         setIsY(true)
       }
-      if (ga[0] === "b") {
+      if (ga[currentTime] === "b") {
         setIsB(true)
       }
-      console.log(ga[0]);
-      ga.splice(0, 1)
-      setGameArray([...ga])
+      console.log(currentTime);
+      // ga.splice(0, 1)
+      // setGameArray([...ga])
     }
   }
 
-  // const loop = useCallback(() => {
   const loop = () => {
     if (isPlaying) {
+
       let veryLow = 0
       let low = 0
       let high = 0
@@ -163,14 +172,9 @@ const App = () => {
       // updatePitch()
       var buf = new Float32Array(2048);
       analyserNode.getFloatTimeDomainData(buf);
-      // console.log(analyserNode.getFloatTimeDomainData(buf));
-      // console.log("context.sampleRate : ", context.sampleRate);
-
       var pitch = autoCorrelate(buf, context.sampleRate);
-      // console.log("pitch : ", pitch);
-
       var note = noteFromPitch(pitch);
-      // console.log("note : ", note);
+
       if ((note % 12) >= 0 && (note % 12) <= 2) {
         veryLow++
       }
@@ -202,45 +206,37 @@ const App = () => {
       } else {
         gameArr.push("empty")
       }
-
+      console.log("gameArr : ", gameArr);
+      if (time >= 4) playNotes(time, gameArr)
+      time++;
       setGameArray([...gameArr])
-      // console.log("gameArr :  ", gameArr);
-
-
-      // playNotes(gameArr);
-
-
-      // console.log("veryLow : ", veryLow);
-      // console.log("low : ", low);
-      // console.log("high : ", high);
-      // console.log("veryHigh : ", veryHigh);
     } else {
       source.stop()
       sourceGame.stop()
     }
-    // }, [amplitudeArray, analyserNode, context, gainNode, isPlaying, source])
   }
 
-  function handleStop() {
-    console.log("Stoop");
-    isPlaying = false
-    // setIsGamePlaying(false)
+  // function handleStop() {
+  //   console.log("Stoop");
+  //   isPlaying = false
+  //   // setIsGamePlaying(false)
 
-    // setIsPlaying(false)
+  //   // setIsPlaying(false)
 
-    // source.stop()
-    sourceGame.stop()
+  //   // source.stop()
+  //   sourceGame.stop()
 
-    setIsLeft(false)
-    setIsUp(false)
-    setIsY(false)
-    setIsB(false)
-  }
+  //   setIsLeft(false)
+  //   setIsUp(false)
+  //   setIsY(false)
+  //   setIsB(false)
+  // }
 
   const handlePlay = () => {
     context = new AudioContext()
     contextGame = new AudioContext()
     setupAudioNodes()
+    setIsLoading(true)
 
     // setIsPlaying(true)
     isPlaying = true
@@ -261,6 +257,8 @@ const App = () => {
             handleLoop()
 
             setTimeout(() => {
+              setIsLoading(false)
+
               setIsGamePlaying(true)
               isGPlaying = true
               playGame(gameBuffer) // GAME MUSIC
@@ -282,7 +280,7 @@ const App = () => {
     if (isLeft) {
       setTimeout(() => {
         setIsLeft(false)
-      }, bpm * 4)
+      }, bpm * 2)
     }
   }, [isLeft])
 
@@ -290,7 +288,7 @@ const App = () => {
     if (isB) {
       setTimeout(() => {
         setIsB(false)
-      }, bpm * 4)
+      }, bpm * 2)
     }
   }, [isB])
 
@@ -298,7 +296,7 @@ const App = () => {
     if (isUp) {
       setTimeout(() => {
         setIsUp(false)
-      }, bpm * 4)
+      }, bpm * 2)
     }
   }, [isUp])
 
@@ -306,35 +304,75 @@ const App = () => {
     if (isY) {
       setTimeout(() => {
         setIsY(false)
-      }, bpm * 4)
+      }, bpm * 2)
     }
   }, [isY])
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      console.log("INTERVAL");
-      playNotes()
-    }, bpm);
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     console.log("INTERVAL");
+  //     // console.log("gameArray : ", gameArray);
+  //     if (isGamePlaying) playNotes()
+  //   }, bpm);
 
-    return () => {
-      clearInterval(interval);
-    };
-  }, []);
+  //   return () => {
+  //     clearInterval(interval);
+  //   };
+  // }, [isGamePlaying]);
+
+  useEffect(() => {
+    if (textResult) {
+      setTimeout(() => {
+        setTextResult("")
+      }, bpm / 2)
+    }
+  }, [textResult])
 
   // Add event listeners
   Gamepads.addEventListener('connect', e => {
-    console.log('Gamepad connected');
+    // console.log('Gamepad connected');
+    setIsControllerReady(true)
     console.log(e.gamepad);
     e.gamepad.addEventListener('buttonpress', e => {
       console.log(e.index);
+
+      // if (!isGamePlaying) {
+      //   if (e.index === 0) {
+      //     handlePlay()
+      //   }
+      // }
+
+      console.log("gameArray : ", gameArray);
+      // let currentNote = gameArray[0]
       if (e.index === 1) {
+        console.log("isB", isB);
         console.log("Bouton B");
+        // if (currentNote === "b") {
+        //   setTextResult("yes")
+        // } else {
+        //   setTextResult("X")
+        // }
       } else if (e.index === 3) {
         console.log("Bouton Y");
+        // if (currentNote === "y") {
+        //   setTextResult("yes")
+        // } else {
+        //   setTextResult("X")
+        // }
       } else if (e.index === 12) {
         console.log("Bouton up");
+        // if (currentNote === "up") {
+        //   setTextResult("yes")
+        // } else {
+        //   setTextResult("X")
+        // }
       } else if (e.index === 14) {
         console.log("Bouton left");
+        // if (currentNote === "left") {
+        //   setTextResult("yes")
+        // } else {
+        //   setTextResult("X")
+        // }
       }
     });
   });
@@ -344,24 +382,44 @@ const App = () => {
       <div>
 
         <h1 className='title'>Voice Hero</h1>
-        <div>
-          <div>
-            <h2 className='button-play' onClick={handlePlay} >Play</h2>
-            {/* <button onClick={handleStop} >Stop</button> */}
-          </div>
-          <div style={{ display: "inline-flex" }}>
-            {/* <div style={{ margin: 20 }} >{isLeft ? "Left" : "_"}</div>
+        {
+          isControllerReady ?
+            <div>
+              <div>
+                {
+                  !isGamePlaying &&
+                  // <h2 className='button-play' >A : Play</h2>
+                  <div>
+                    {
+                      isLoading ?
+                        <div>Chargement ... </div> :
+                        <h2 className='button-play' onClick={handlePlay} >Play</h2>
+                    }
+                  </div>
+                }
+                {
+                  isGamePlaying &&
+                  <p>{textResult}</p>
+                }
+                {/* <button onClick={handleStop} >Stop</button> */}
+              </div>
+              <div style={{ display: "inline-flex" }}>
+                {/* <div style={{ margin: 20 }} >{isLeft ? "Left" : "_"}</div>
             <div style={{ margin: 20 }} >{isUp ? "Up" : "_"}</div>
             <div style={{ margin: 20 }} >{isY ? "Y" : "_"}</div>
             <div style={{ margin: 20 }} >{isB ? "B" : "_"}</div> */}
-            <div className={isLeft ? 'button-controller active' : "button-controller"} style={{ margin: 20 }} >{isLeft ? "Left" : "_"}</div>
-            <div className={isUp ? 'button-controller active' : "button-controller"} style={{ margin: 20 }} >{isUp ? "Up" : "_"}</div>
-            <div className={isY ? 'button-controller active' : "button-controller"} style={{ margin: 20 }} >{isY ? "Y" : "_"}</div>
-            <div className={isB ? 'button-controller active' : "button-controller"} style={{ margin: 20 }} >{isB ? "B" : "_"}</div>
-          </div>
-        </div>
+                <div className={isLeft ? 'button-controller active' : "button-controller"} >{isLeft ? "Left" : "_"}</div>
+                <div className={isUp ? 'button-controller active' : "button-controller"} >{isUp ? "Up" : "_"}</div>
+                <div className={isY ? 'button-controller active' : "button-controller"} >{isY ? "Y" : "_"}</div>
+                <div className={isB ? 'button-controller active' : "button-controller"} >{isB ? "B" : "_"}</div>
+              </div>
+            </div> :
+            <div>
+              <h2 className='press-key'>Press any key</h2>
+            </div>
+        }
       </div>
-    </div>
+    </div >
   );
 }
 

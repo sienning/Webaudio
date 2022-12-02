@@ -50,6 +50,7 @@
 .title {
   font-family: 'Metal Mania', cursive;
   font-size: 8em;
+  text-shadow: 0 0 2px white;
 }
 
 .button-play {
@@ -57,30 +58,51 @@
   cursor: pointer;
 }
 
-.button-play:hover {
+.button-play {
   font-family: 'Rock Salt', cursive;
   cursor: pointer;
   color: #6e2423;
 }
 
 .button-controller {
+  text-shadow: 0 0 2px white;
+
   font-family: 'Arimo', sans-serif;
-  height: 40px;
+  height: 200px;
+  margin: 200px 30px;
 }
 
 .button-controller.active {
-  animation-name: letterdown;
-  animation-duration: 1860ms;
+  /* animation-name: letterdown; */
+  /* animation-duration: 232ms; */
 }
 
 @keyframes letterdown {
   0% {
-    top: 0px;
+    margin-top: 0px;
   }
-  75% {
-    top: 10px;
+  50% {
+    margin-top: 20px;
+  }
+  80% {
+    margin-top: 200px;
+  }
+  90% {
+    color: green;
+
+    margin-top: 200px;
   }
   100% {
-    color: green;
+    margin-top: 200px;
+  }
+}
+
+.press-key {
+  animation: blinker 1s linear infinite;
+}
+
+@keyframes blinker {
+  50% {
+    opacity: 0;
   }
 }
