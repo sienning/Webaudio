@@ -2,7 +2,7 @@ import './App.css';
 import Gamepads from 'gamepads';
 
 // import songs from './assets/songs.json';
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 const App = () => {
   const [isLoading, setIsLoading] = useState(false)
@@ -14,8 +14,32 @@ const App = () => {
   const [isGamePlaying, setIsGamePlaying] = useState(false)
   const [textResult, setTextResult] = useState("")
   const [gameArray, setGameArray] = useState([])
-  const [currentNote, setCurrentNote] = useState("")
+  // const [currentNote, setCurrentNote] = useState("")
   // const [time, setTime] = useState(0)
+
+  const isBRef = React.useRef(isB);
+  const setBRef = data => {
+    isBRef.current = data;
+    setIsB(data);
+  };
+
+  const isYRef = React.useRef(isY);
+  const setYRef = data => {
+    isYRef.current = data;
+    setIsY(data);
+  };
+
+  const isUpRef = React.useRef(isUp);
+  const setUpRef = data => {
+    isUpRef.current = data;
+    setIsUp(data);
+  };
+
+  const isLeftRef = React.useRef(isLeft);
+  const setLeftRef = data => {
+    isLeftRef.current = data;
+    setIsLeft(data);
+  };
 
   let time = 0
   Gamepads.start();
@@ -144,18 +168,22 @@ const App = () => {
       // console.log("ga : ", ga);
       // console.log(ga);
       if (ga[currentTime] === "left") {
-        setIsLeft(true)
+        // setIsLeft(true)
+        setLeftRef(true)
       }
       if (ga[currentTime] === "up") {
-        setIsUp(true)
+        // setIsUp(true)
+        setUpRef(true)
       }
       if (ga[currentTime] === "y") {
-        setIsY(true)
+        // setIsY(true)
+        setYRef(true)
       }
       if (ga[currentTime] === "b") {
-        setIsB(true)
+        // setIsB(true)
+        setBRef(true)
       }
-      setCurrentNote(ga[currentTime])
+      // setCurrentNote(ga[currentTime])
       // console.log(ga[currentTime]);
       // ga.splice(0, 1)
       // setGameArray([...ga])
@@ -283,35 +311,39 @@ const App = () => {
   useEffect(() => {
     if (isLeft) {
       setTimeout(() => {
-        setIsLeft(false)
-      }, bpm * 2)
+        setLeftRef(false)
+        // setIsLeft(false)
+      }, bpm - 50)
     }
   }, [isLeft])
 
   useEffect(() => {
 
     if (isB) {
-      console.log("USE true B");
+      // console.log("USE true B");
       setTimeout(() => {
-        console.log("USE false B");
-        setIsB(false)
-      }, bpm * 2)
+        // console.log("USE false B");
+        // setIsB(false)
+        setBRef(false)
+      }, bpm - 50)
     }
   }, [isB])
 
   useEffect(() => {
     if (isUp) {
       setTimeout(() => {
-        setIsUp(false)
-      }, bpm * 2)
+        // setIsUp(false)
+        setUpRef(false)
+      }, bpm - 50)
     }
   }, [isUp])
 
   useEffect(() => {
     if (isY) {
       setTimeout(() => {
-        setIsY(false)
-      }, bpm * 2)
+        // setIsY(false)
+        setYRef(false)
+      }, bpm - 50)
     }
   }, [isY])
 
@@ -323,60 +355,100 @@ const App = () => {
     }
   }, [textResult])
 
+  const checkB = useCallback(() => {
+    // const checkB = () => {
+    console.log("CHECK B", isB);
+    return isB
+  }, [isB])
+  // }
+
+  const checkY = useCallback(() => {
+    // const checkY = () => {
+    console.log("CHECK Y", isY);
+    return isY
+  }, [isY])
+  // }
+
+
+  const checkUp = useCallback(() => {
+    // const checkUp = () => {
+    console.log("CHECK UP", isUp);
+    return isUp
+  }, [isUp])
+  // }
+
+  const checkLeft = useCallback(() => {
+    // const checkLeft = () => {
+    console.log("CHECK LEFT", isLeft);
+    return isLeft
+  }, [isLeft])
+  // }
+
 
   useEffect(() => {
-    const b = isB;
-    const y = isY;
-    const left = isLeft;
-    const up = isUp;
-    console.log("GAMEPAD isB", b);
+    // const b = checkB();
+    // const y = checkY();
+    // const left = checkLeft();
+    // const up = checkUp();
+    // console.log("GAMEPAD1 isB", b);
+    // checkB()
+
 
     // Add event listeners
-    Gamepads.addEventListener('connect', e => {
+    Gamepads.addEventListener('connect', (e) => {
       // console.log('Gamepad connected');
       setIsControllerReady(true)
       console.log(e.gamepad);
 
+    
+
+      // let eltb = document.getElementById("b")
+      // eltb.style.background = "white" 
+
+      // let elty = document.getElementById("y")
+      // elty.style.background = "white" 
+
+      // let eltleft = document.getElementById("left")
+      // eltleft.style.background = "white"
+
+      // let eltup = document.getElementById("up")
+      // eltup.style.background = "white"
+
       e.gamepad.addEventListener('buttonpress', e => {
-        // console.log(e.index);
-
-        // if (!isGamePlaying) {
-        //   if (e.index === 0) {
-        //     handlePlay()
-        //   }
-        // }
-
-        // console.log("currentNote : ", currentNote);
-        // console.log("gameArray : ", gameArray);
-        // let currentNote = gameArray[0]
+        // console.log("GAMEPAD2 isB", b);
+        // console.log("currentNote", currentNote);
         if (e.index === 1) {
-          console.log("isB", b);
+          // eltb.style.background = "#f9db5b"
+          console.log("isB", isBRef.current);
           // console.log("Bouton B");
-          if (b) {
+          if (isBRef.current) {
             setTextResult("yes")
           } else {
             setTextResult("X")
           }
         } else if (e.index === 3) {
+          // elty.style.background = "#f9db5b"
           // console.log("isY", isY);
           // console.log("Bouton Y");
-          if (y) {
+          if (isYRef.current) {
             setTextResult("yes")
           } else {
             setTextResult("X")
           }
         } else if (e.index === 12) {
+          // eltup.style.background = "#f9db5b"
           // console.log("isUp", isUp);
           // console.log("Bouton up");
-          if (up) {
+          if (isUpRef.current) {
             setTextResult("yes")
           } else {
             setTextResult("X")
           }
         } else if (e.index === 14) {
+          // eltleft.style.background = "#f9db5b"
           // console.log("isLeft", isLeft);
           // console.log("Bouton left");
-          if (left) {
+          if (isLeftRef.current) {
             setTextResult("yes")
           } else {
             setTextResult("X")
@@ -384,7 +456,8 @@ const App = () => {
         }
       });
     });
-  }, [isB, isY, isLeft, isUp])
+    // }, [])
+  }, [])
 
   return (
     <div className="App">
@@ -415,15 +488,23 @@ const App = () => {
                 </div>
                 {/* <button onClick={handleStop} >Stop</button> */}
               </div>
-              <div style={{ display: "inline-flex" }}>
+              <div>
                 {/* <div style={{ margin: 20 }} >{isLeft ? "Left" : "_"}</div>
             <div style={{ margin: 20 }} >{isUp ? "Up" : "_"}</div>
             <div style={{ margin: 20 }} >{isY ? "Y" : "_"}</div>
             <div style={{ margin: 20 }} >{isB ? "B" : "_"}</div> */}
-                <div className={isLeft ? 'button-controller active' : "button-controller"} >{isLeft ? "Left" : "_"}</div>
-                <div className={isUp ? 'button-controller active' : "button-controller"} >{isUp ? "Up" : "_"}</div>
-                <div className={isY ? 'button-controller active' : "button-controller"} >{isY ? "Y" : "_"}</div>
-                <div className={isB ? 'button-controller active' : "button-controller"} >{isB ? "B" : "_"}</div>
+                <div className='button-final'>
+                  <div id="left" className={"button-controller"} >{"<"}</div>
+                  <div id="up" className={"button-controller"} >{"^"}</div>
+                  <div id="y" className={"button-controller"} >Y</div>
+                  <div id="b" className={"button-controller"} >B</div>
+                </div>
+                <div className='button-game'>
+                  <div className={isLeft ? 'button-game-playing active' : "button-game-playing inactive"} ></div>
+                  <div className={isUp ? 'button-game-playing active' : "button-game-playing inactive"} ></div>
+                  <div className={isY ? 'button-game-playing active' : "button-game-playing inactive"} ></div>
+                  <div className={isB ? 'button-game-playing active' : "button-game-playing inactive"} ></div>
+                </div>
               </div>
             </div> :
             <div>
