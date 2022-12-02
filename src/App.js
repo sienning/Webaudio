@@ -2,7 +2,7 @@ import './App.css';
 import Gamepads from 'gamepads';
 
 // import songs from './assets/songs.json';
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 const App = () => {
   const [isLoading, setIsLoading] = useState(false)
@@ -20,6 +20,9 @@ const App = () => {
   const [isY, setIsY] = useState(false)
   const [isB, setIsB] = useState(false)
 
+  // POINTS
+  // const [points, setPoints] = useState(0)
+
   const [isGamePlaying, setIsGamePlaying] = useState(false)
   const [textResult, setTextResult] = useState("")
   const [gameArray, setGameArray] = useState([])
@@ -31,6 +34,8 @@ const App = () => {
     isBRef.current = data;
     setIsB(data);
   };
+
+  
 
   const isYRef = React.useRef(isY);
   const setYRef = data => {
@@ -73,6 +78,12 @@ const App = () => {
     isLeftRefOn.current = data;
     setIsLeftOn(data);
   };
+
+  // const isGamePlayingRef = React.useRef(isGamePlaying);
+  // const setIsGamePlayingRef = data => {
+  //   isGamePlaying.current = data;
+  //   setIsGamePlayingRef(data);
+  // };
 
 
   let time = 0
@@ -303,6 +314,7 @@ const App = () => {
     contextGame = new AudioContext()
     setupAudioNodes()
     setIsLoading(true)
+    // setIsGamePlayingRef(true)
 
     // setIsPlaying(true)
     isPlaying = true
@@ -346,7 +358,6 @@ const App = () => {
     if (isLeft) {
       setTimeout(() => {
         setLeftRef(false)
-        // setIsLeft(false)
       }, bpm - 50)
     }
   }, [isLeft])
@@ -354,10 +365,7 @@ const App = () => {
   useEffect(() => {
 
     if (isB) {
-      // console.log("USE true B");
       setTimeout(() => {
-        // console.log("USE false B");
-        // setIsB(false)
         setBRef(false)
       }, bpm - 50)
     }
@@ -366,7 +374,6 @@ const App = () => {
   useEffect(() => {
     if (isUp) {
       setTimeout(() => {
-        // setIsUp(false)
         setUpRef(false)
       }, bpm - 50)
     }
@@ -375,7 +382,6 @@ const App = () => {
   useEffect(() => {
     if (isY) {
       setTimeout(() => {
-        // setIsY(false)
         setYRef(false)
       }, bpm - 50)
     }
@@ -461,7 +467,7 @@ const App = () => {
     <div className="App">
       <div>
 
-        <h1 className='title'>Voice Hero</h1>
+        <h1 style={{ margin: 0 }} className='title'>Voice Hero</h1>
         {
           isControllerReady ?
             <div>
@@ -480,22 +486,18 @@ const App = () => {
                 <div style={{ height: "50px" }}>
                   {
                     isGamePlaying ?
-                      <p style={{ fontSize: 20 }}>{textResult}</p>
+                      <p className='text-result'>{textResult}</p>
                       : <p></p>
                   }
                 </div>
                 {/* <button onClick={handleStop} >Stop</button> */}
               </div>
               <div>
-                {/* <div style={{ margin: 20 }} >{isLeft ? "Left" : "_"}</div>
-            <div style={{ margin: 20 }} >{isUp ? "Up" : "_"}</div>
-            <div style={{ margin: 20 }} >{isY ? "Y" : "_"}</div>
-            <div style={{ margin: 20 }} >{isB ? "B" : "_"}</div> */}
                 <div className='button-final'>
-                  <div id="left" style={isLeftOn ? {background: "#f9db5b"} : {background: "white"}} className={"button-controller"} >{"<"}</div>
-                  <div id="up" style={isUpOn ? {background: "#f9db5b"} : {background: "white"}} className={"button-controller"} >{"^"}</div>
-                  <div id="y" style={isYOn ? {background: "#f9db5b"} : {background: "white"}} className={"button-controller"} >Y</div>
-                  <div id="b" style={isBOn ? {background: "#f9db5b"} : {background: "white"}} className={"button-controller"} >B</div>
+                  <div id="left" style={isLeftOn ? { background: "#f9db5b" } : { background: "white" }} className={"button-controller"} >{"<"}</div>
+                  <div id="up" style={isUpOn ? { background: "#f9db5b" } : { background: "white" }} className={"button-controller"} >{"^"}</div>
+                  <div id="y" style={isYOn ? { background: "#f9db5b" } : { background: "white" }} className={"button-controller"} >Y</div>
+                  <div id="b" style={isBOn ? { background: "#f9db5b" } : { background: "white" }} className={"button-controller"} >B</div>
                 </div>
                 <div className='button-game'>
                   <div className={isLeft ? 'button-game-playing active' : "button-game-playing inactive"} ></div>

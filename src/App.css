@@ -140,3 +140,7 @@
     opacity: 0;
   }
 }
+
+.text-result {
+  text-shadow: 0 0 2px white;
+}
