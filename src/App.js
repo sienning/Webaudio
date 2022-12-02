@@ -14,6 +14,7 @@ const App = () => {
   const [isGamePlaying, setIsGamePlaying] = useState(false)
   const [textResult, setTextResult] = useState("")
   const [gameArray, setGameArray] = useState([])
+  const [currentNote, setCurrentNote] = useState("")
   // const [time, setTime] = useState(0)
 
   let time = 0
@@ -134,13 +135,13 @@ const App = () => {
     // isPlaying = true
   }
 
-  function playNotes(time, ga) {
-    console.log("gameArray : ", gameArray);
-    console.log("ga : ", ga);
-    let currentTime = time - 4
+  function playNotes(t, ga) {
+    // console.log("gameArray : ", gameArray);
+    // console.log("ga : ", ga);
+    let currentTime = t - 3
     if (ga.length > 0) {
-      console.log("We play notes");
-      console.log("ga : ", ga);
+      // console.log("We play notes");
+      // console.log("ga : ", ga);
       // console.log(ga);
       if (ga[currentTime] === "left") {
         setIsLeft(true)
@@ -154,7 +155,8 @@ const App = () => {
       if (ga[currentTime] === "b") {
         setIsB(true)
       }
-      console.log(currentTime);
+      setCurrentNote(ga[currentTime])
+      // console.log(ga[currentTime]);
       // ga.splice(0, 1)
       // setGameArray([...ga])
     }
@@ -206,9 +208,11 @@ const App = () => {
       } else {
         gameArr.push("empty")
       }
-      console.log("gameArr : ", gameArr);
-      if (time >= 4) playNotes(time, gameArr)
-      time++;
+      // console.log("gameArr : ", gameArr);
+      if (time >= 3) playNotes(time, gameArr)
+      setTimeout(() => {
+        time++;
+      }, 100)
       setGameArray([...gameArr])
     } else {
       source.stop()
@@ -285,8 +289,11 @@ const App = () => {
   }, [isLeft])
 
   useEffect(() => {
+
     if (isB) {
+      console.log("USE true B");
       setTimeout(() => {
+        console.log("USE false B");
         setIsB(false)
       }, bpm * 2)
     }
@@ -308,18 +315,6 @@ const App = () => {
     }
   }, [isY])
 
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     console.log("INTERVAL");
-  //     // console.log("gameArray : ", gameArray);
-  //     if (isGamePlaying) playNotes()
-  //   }, bpm);
-
-  //   return () => {
-  //     clearInterval(interval);
-  //   };
-  // }, [isGamePlaying]);
-
   useEffect(() => {
     if (textResult) {
       setTimeout(() => {
@@ -328,54 +323,68 @@ const App = () => {
     }
   }, [textResult])
 
-  // Add event listeners
-  Gamepads.addEventListener('connect', e => {
-    // console.log('Gamepad connected');
-    setIsControllerReady(true)
-    console.log(e.gamepad);
-    e.gamepad.addEventListener('buttonpress', e => {
-      console.log(e.index);
 
-      // if (!isGamePlaying) {
-      //   if (e.index === 0) {
-      //     handlePlay()
-      //   }
-      // }
+  useEffect(() => {
+    const b = isB;
+    const y = isY;
+    const left = isLeft;
+    const up = isUp;
+    console.log("GAMEPAD isB", b);
 
-      console.log("gameArray : ", gameArray);
-      // let currentNote = gameArray[0]
-      if (e.index === 1) {
-        console.log("isB", isB);
-        console.log("Bouton B");
-        // if (currentNote === "b") {
-        //   setTextResult("yes")
-        // } else {
-        //   setTextResult("X")
+    // Add event listeners
+    Gamepads.addEventListener('connect', e => {
+      // console.log('Gamepad connected');
+      setIsControllerReady(true)
+      console.log(e.gamepad);
+
+      e.gamepad.addEventListener('buttonpress', e => {
+        // console.log(e.index);
+
+        // if (!isGamePlaying) {
+        //   if (e.index === 0) {
+        //     handlePlay()
+        //   }
         // }
-      } else if (e.index === 3) {
-        console.log("Bouton Y");
-        // if (currentNote === "y") {
-        //   setTextResult("yes")
-        // } else {
-        //   setTextResult("X")
-        // }
-      } else if (e.index === 12) {
-        console.log("Bouton up");
-        // if (currentNote === "up") {
-        //   setTextResult("yes")
-        // } else {
-        //   setTextResult("X")
-        // }
-      } else if (e.index === 14) {
-        console.log("Bouton left");
-        // if (currentNote === "left") {
-        //   setTextResult("yes")
-        // } else {
-        //   setTextResult("X")
-        // }
-      }
+
+        // console.log("currentNote : ", currentNote);
+        // console.log("gameArray : ", gameArray);
+        // let currentNote = gameArray[0]
+        if (e.index === 1) {
+          console.log("isB", b);
+          // console.log("Bouton B");
+          if (b) {
+            setTextResult("yes")
+          } else {
+            setTextResult("X")
+          }
+        } else if (e.index === 3) {
+          // console.log("isY", isY);
+          // console.log("Bouton Y");
+          if (y) {
+            setTextResult("yes")
+          } else {
+            setTextResult("X")
+          }
+        } else if (e.index === 12) {
+          // console.log("isUp", isUp);
+          // console.log("Bouton up");
+          if (up) {
+            setTextResult("yes")
+          } else {
+            setTextResult("X")
+          }
+        } else if (e.index === 14) {
+          // console.log("isLeft", isLeft);
+          // console.log("Bouton left");
+          if (left) {
+            setTextResult("yes")
+          } else {
+            setTextResult("X")
+          }
+        }
+      });
     });
-  });
+  }, [isB, isY, isLeft, isUp])
 
   return (
     <div className="App">
@@ -397,10 +406,13 @@ const App = () => {
                     }
                   </div>
                 }
-                {
-                  isGamePlaying &&
-                  <p>{textResult}</p>
-                }
+                <div style={{ height: "50px" }}>
+                  {
+                    isGamePlaying ?
+                      <p>{textResult}</p>
+                      : <p></p>
+                  }
+                </div>
                 {/* <button onClick={handleStop} >Stop</button> */}
               </div>
               <div style={{ display: "inline-flex" }}>

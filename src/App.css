@@ -73,8 +73,8 @@
 }
 
 .button-controller.active {
-  /* animation-name: letterdown; */
-  /* animation-duration: 232ms; */
+  animation-name: letterdown;
+  animation-duration: 652ms;
 }
 
 @keyframes letterdown {
